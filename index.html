@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 Book Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #D7F9F1, #E5C1BD);
+            color: #233D4D;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.5s ease-in-out;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #5A2A27;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #8D5B4C;
+            transition: border-color 0.3s ease;
+            font-size: 16px;
+            background: white;
+            color: #233D4D;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #E5C1BD;
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background: #5A2A27;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(90, 42, 39, 0.3);
+        }
+
+        #results {
+            margin-top: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .book-item {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 16px;
+            margin: 10px 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .book-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .book-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #233D4D;
+        }
+
+        .book-link {
+            color: #8D5B4C;
+            text-decoration: none;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .book-link:hover {
+            color: #5A2A27;
+            text-decoration: underline;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #5A2A27;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        input[type="checkbox"]:checked {
+            transform: scale(1.2);
+        }
+
+        #saveButton {
+            display: none;
+            margin-top: 20px;
+            background: #8D5B4C;
+            color: white;
+        }
+
+        #saveButton:hover {
+            background: #5A2A27;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📙 Labz's Book Finder 🌷</h1>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Enter book title or author...">
+            <button onclick="searchBooks()" id="searchButton">Search</button>
+        </div>
+        <div id="results"></div>
+        <button id="saveButton" onclick="saveSelected()">Save & Open Selected</button>
+    </div>
+
+    <script>
+        async function searchBooks() {
+            const searchButton = document.getElementById('searchButton');
+            const resultsDiv = document.getElementById('results');
+            const query = document.getElementById('searchInput').value;
+
+            if (!query.trim()) {
+                alert("Please enter a book title or author.");
+                return;
+            }
+
+            searchButton.disabled = true;
+            searchButton.textContent = 'Searching...';
+            resultsDiv.innerHTML = '<div class="loading">🔍 Searching for books...</div>';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, maxPages: 5 })
+                });
+
+                const data = await response.json();
+                if (data.books.length === 0) {
+                    resultsDiv.innerHTML = '<div class="loading">❌ No books found</div>';
+                } else {
+                    displayResults(data.books);
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="loading">⚠️ Failed to search books</div>';
+            } finally {
+                searchButton.disabled = false;
+                searchButton.textContent = 'Search';
+            }
+        }
+
+        function displayResults(books) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = books.map((book, index) => `
+                <div class="book-item">
+                    <input type="checkbox" id="book${index}">
+                    <div class="book-title">${book.Title}</div>
+                    <a href="${book.Link}" class="book-link" target="_blank">🔗 Open</a>
+                </div>
+            `).join('');
+            document.getElementById('saveButton').style.display = 'block';
+        }
+
+        function saveSelected() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Please select at least one book.");
+                return;
+            }
+
+            const links = [];
+            checkboxes.forEach(cb => {
+                const link = cb.parentElement.querySelector('a').href;
+                links.push(link);
+                window.open(link, '_blank');
+            });
+
+            alert(`Opening ${links.length} book links...`);
+        }
+    </script>
+</body>
+</html>
