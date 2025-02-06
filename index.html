@@ -144,6 +144,10 @@
     </style>
   </head>
   <body>
+    <div class="background-container">
+      <div class="floating-messages"></div>
+    </div>
+
     <div class="container">
       <h1>📙 Labz's Book Finder 🌷</h1>
       <div class="search-box">
@@ -161,84 +165,77 @@
     </div>
 
     <script>
-      const API_BASE_URL = "https://bookfinder-fe2d.onrender.com"; // ✅ Correct API
+      const loveMessages = [
+        "💖 Your beauty outshines the stars ✨",
+        "💞 The sweetest, prettiest baby 🌙",
+        "🌹 You are a dream wrapped in stardust 💫",
+        "💌 Your laughter is my favorite melody 🎶",
+        "🌸 In your eyes, I see galaxies of love 🌌",
+        "💘 Every heartbeat whispers your name 💞",
+        "✨ Forever, and one more day 🎀",
+        
+      ];
 
-      async function searchBooks() {
-        const searchButton = document.getElementById("searchButton");
-        const resultsDiv = document.getElementById("results");
-        const query = document.getElementById("searchInput").value;
+      function createMessage() {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("love-message");
+        messageDiv.innerText =
+          loveMessages[Math.floor(Math.random() * loveMessages.length)];
 
-        if (!query.trim()) {
-          alert("Please enter a book title or author.");
-          return;
-        }
+        messageDiv.style.left = Math.random() * 80 + "vw"; // Random horizontal position
+        messageDiv.style.animationDuration = Math.random() * 5 + 5 + "s"; // Random speed
 
-        searchButton.disabled = true;
-        searchButton.textContent = "Searching...";
-        resultsDiv.innerHTML =
-          '<div class="loading">🔍 Searching for books...</div>';
+        document.querySelector(".floating-messages").appendChild(messageDiv);
 
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/search`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query, maxPages: 5 }),
-          });
-
-          const data = await response.json();
-          if (data.books.length === 0) {
-            resultsDiv.innerHTML =
-              '<div class="loading">❌ No books found</div>';
-          } else {
-            displayResults(data.books);
-          }
-        } catch (error) {
-          resultsDiv.innerHTML =
-            '<div class="loading">⚠️ Failed to search books</div>';
-        } finally {
-          searchButton.disabled = false;
-          searchButton.textContent = "Search";
-        }
+        // Remove after animation
+        setTimeout(() => {
+          messageDiv.remove();
+        }, 10000);
       }
 
-      function displayResults(books) {
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.innerHTML = books
-          .map(
-            (book, index) => `
-                <div class="book-item">
-                    <input type="checkbox" id="book${index}">
-                    <div class="book-title">${book.Title}</div>
-                    <a href="${book.Link}" class="book-link" target="_blank">🔗 Open</a>
-                </div>
-            `
-          )
-          .join("");
-        document.getElementById("saveButton").style.display = "block";
-      }
-
-      async function saveSelected() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        if (checkboxes.length === 0) {
-          alert("Please select at least one book.");
-          return;
-        }
-
-        const links = [];
-        checkboxes.forEach((cb) => {
-          const link = cb.parentElement.querySelector("a").href;
-          links.push(link);
-          window.open(link, "_blank");
-        });
-
-        await fetch(`${API_BASE_URL}/api/save-links`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ links }),
-        });
-
-        alert(`Saved ${links.length} book links!`);
-      }
+      setInterval(createMessage, 3000); // Add a new message every 3 seconds
     </script>
+
+    <style>
+      /* 💖 Background container */
+      .background-container {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        background: linear-gradient(135deg, #d7f9f1, #e5c1bd);
+      }
+
+      /* 💌 Floating love messages */
+      .floating-messages {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      .love-message {
+        position: absolute;
+        font-size: 18px;
+        font-weight: bold;
+        color: rgba(90, 42, 39, 0.5); /* Soft reddish-brown */
+        opacity: 0.7;
+        animation: floatMessage 10s linear infinite;
+      }
+
+      @keyframes floatMessage {
+        from {
+          transform: translateY(100vh);
+          opacity: 0;
+        }
+        50% {
+          opacity: 0.7;
+        }
+        to {
+          transform: translateY(-10vh);
+          opacity: 0;
+        }
+      }
+    </style>
   </body>
 </html>
