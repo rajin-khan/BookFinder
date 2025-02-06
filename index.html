@@ -5,127 +5,277 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Labz's Book Finder</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #d7f9f1, #e5c1bd);
-        color: #233d4d;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      :root {
+        --primary: #5a2a27;
+        --secondary: #8d5b4c;
+        --background: #f5f5f5;
+        --text: #233d4d;
+        --container-bg: rgba(255, 255, 255, 0.8);
+        --book-item-bg: rgba(255, 255, 255, 0.6);
+        --book-item-hover: rgba(255, 255, 255, 0.8);
+        --input-bg: rgba(255, 255, 255, 0.9);
+        --button-text: white;
+        --scroll-thumb: var(--secondary);
+        --scroll-track: rgba(255, 255, 255, 0.4);
+      }
+
+      [data-theme="dark"] {
+        --primary: #ff9e80;
+        --secondary: #ffab91;
+        --background: #1a1a1a;
+        --text: #e0e0e0;
+        --container-bg: rgba(30, 30, 30, 0.8);
+        --book-item-bg: rgba(40, 40, 40, 0.6);
+        --book-item-hover: rgba(50, 50, 50, 0.8);
+        --input-bg: rgba(40, 40, 40, 0.9);
+        --button-text: #1a1a1a;
+        --scroll-thumb: var(--primary);
+        --scroll-track: rgba(0, 0, 0, 0.2);
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .theme-toggle-button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        background: var(--container-bg);
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .theme-toggle-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      @keyframes gentleFloat {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
+      }
+
+      @keyframes fadeScale {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
         margin: 0;
-        transition: background 0.5s ease-in-out;
+        padding: 20px;
+      }
+
+      body[data-theme="light"] {
+        background: linear-gradient(-45deg, #d7f9f1, #e5c1bd, #f7d6e0, #eff7f6);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+      }
+
+      body[data-theme="dark"] {
+        background: linear-gradient(-45deg, #2c3e50, #3d2c3e, #2c3e50, #34495e);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
       }
 
       .container {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(12px);
-        padding: 30px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        max-width: 600px;
+        background: var(--container-bg);
+        backdrop-filter: blur(20px);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        max-width: 700px;
         width: 100%;
         text-align: center;
-        transition: transform 0.3s ease-in-out;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        animation: fadeScale 0.6s ease-out;
       }
 
       h1 {
-        font-family: "Inter", sans-serif;
-        font-size: 28px;
+        font-family: "Playfair Display", serif;
+        font-size: 42px;
         font-weight: 700;
-        margin-bottom: 20px;
-        color: #5a2a27;
+        margin-bottom: 30px;
+        color: var(--primary);
+        letter-spacing: -0.5px;
+      }
+
+      .floating-title {
+        animation: gentleFloat 3s ease-in-out infinite;
       }
 
       .search-box {
         display: flex;
-        gap: 12px;
-        margin-bottom: 20px;
+        gap: 15px;
+        margin-bottom: 30px;
+        transform-style: preserve-3d;
       }
 
       input[type="text"] {
         flex: 1;
-        padding: 12px 16px;
-        border-radius: 8px;
-        border: 2px solid #8d5b4c;
-        transition: border-color 0.3s ease;
+        padding: 16px 24px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-size: 16px;
-        background: white;
-        color: #233d4d;
+        background: var(--input-bg);
+        color: var(--text);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       input[type="text"]:focus {
         outline: none;
-        border-color: #e5c1bd;
-        box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(90, 42, 39, 0.2);
       }
 
       button {
-        padding: 12px 24px;
-        border-radius: 8px;
+        padding: 16px 32px;
+        border-radius: 12px;
         border: none;
-        background: #5a2a27;
-        color: white;
+        background: var(--primary);
+        color: var(--button-text);
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(90, 42, 39, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      button::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.5s;
       }
 
       button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(90, 42, 39, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(90, 42, 39, 0.3);
+      }
+
+      button:hover::after {
+        transform: translate(-50%, -50%) scale(1);
       }
 
       #results {
-        margin-top: 20px;
+        margin-top: 30px;
         max-height: 60vh;
         overflow-y: auto;
-        padding-right: 10px;
+        padding-right: 15px;
+        scroll-behavior: smooth;
+      }
+
+      #results::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #results::-webkit-scrollbar-track {
+        background: var(--scroll-track);
+        border-radius: 4px;
+      }
+
+      #results::-webkit-scrollbar-thumb {
+        background: var(--scroll-thumb);
+        border-radius: 4px;
       }
 
       .book-item {
-        background: rgba(255, 255, 255, 0.3);
-        padding: 16px;
-        margin: 10px 0;
-        border-radius: 12px;
+        background: var(--book-item-bg);
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 16px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+        gap: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeScale 0.5s ease-out;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       }
 
       .book-item:hover {
-        transform: scale(1.02);
-        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        background: var(--book-item-hover);
       }
 
       .book-title {
+        flex: 1;
         font-size: 18px;
-        font-weight: 600;
-        color: #233d4d;
+        font-weight: 500;
+        color: var(--text);
+        text-align: left;
+        line-height: 1.4;
       }
 
       .book-link {
-        color: #8d5b4c;
+        color: var(--secondary);
         text-decoration: none;
-        transition: color 0.3s ease-in-out;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: rgba(141, 91, 76, 0.1);
+        transition: all 0.3s ease;
       }
 
       .book-link:hover {
-        color: #5a2a27;
-        text-decoration: underline;
+        color: var(--button-text);
+        background: var(--secondary);
       }
 
       input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: #5a2a27;
-        transition: transform 0.2s ease-in-out;
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        transition: all 0.3s ease;
+        cursor: pointer;
       }
 
       input[type="checkbox"]:checked {
@@ -134,20 +284,44 @@
 
       #saveButton {
         display: none;
-        margin-top: 20px;
-        background: #8d5b4c;
-        color: white;
+        margin: 30px auto 0;
+        background: var(--secondary);
+        padding: 16px 40px;
       }
 
-      #saveButton:hover {
-        background: #5a2a27;
+      .loading {
+        font-size: 18px;
+        color: var(--secondary);
+        margin: 20px 0;
+        animation: gentleFloat 2s ease-in-out infinite;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 30px 20px;
+        }
+
+        h1 {
+          font-size: 32px;
+        }
+
+        .search-box {
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+        }
       }
     </style>
   </head>
-  <body>
+  <body data-theme="light">
+    <div class="theme-toggle">
+      <button class="theme-toggle-button" onclick="toggleTheme()">🌞</button>
+    </div>
     <div class="container">
-      <h1>📙 Labz's Book Finder 🌷</h1>
-      <div class="search-box">
+      <h1 class="animate__animated animate__fadeInDown floating-title">📙 Labz's Book Finder 🌷</h1>
+      <div class="search-box animate__animated animate__fadeInUp">
         <input
           type="text"
           id="searchInput"
@@ -156,13 +330,34 @@
         <button onclick="searchBooks()" id="searchButton">Search</button>
       </div>
       <div id="results"></div>
-      <button id="saveButton" onclick="saveSelected()">
-        Save & Open Selected
+      <button id="saveButton" onclick="saveSelected()" class="animate__animated animate__fadeIn">
+        🎆 Open Selected
       </button>
     </div>
 
     <script>
-      const API_BASE_URL = "https://bookfinder-fe2d.onrender.com"; // ✅ Correct API
+      // Theme toggle functionality
+      function toggleTheme() {
+        const body = document.body;
+        const button = document.querySelector('.theme-toggle-button');
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        body.setAttribute('data-theme', newTheme);
+        button.textContent = newTheme === 'light' ? '🌞' : '🌙';
+        
+        localStorage.setItem('theme', newTheme);
+      }
+
+      // Load saved theme preference
+      document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle-button').textContent = savedTheme === 'light' ? '🌞' : '🌙';
+      });
+
+      // Original JavaScript
+      const API_BASE_URL = "https://bookfinder-fe2d.onrender.com";
 
       async function searchBooks() {
         const searchButton = document.getElementById("searchButton");
@@ -176,8 +371,7 @@
 
         searchButton.disabled = true;
         searchButton.textContent = "Searching...";
-        resultsDiv.innerHTML =
-          '<div class="loading">🔍 Searching for books...</div>';
+        resultsDiv.innerHTML = '<div class="loading">🔍 Searching for books...</div>';
 
         try {
           const response = await fetch(`${API_BASE_URL}/api/search`, {
@@ -188,14 +382,12 @@
 
           const data = await response.json();
           if (data.books.length === 0) {
-            resultsDiv.innerHTML =
-              '<div class="loading">❌ No books found</div>';
+            resultsDiv.innerHTML = '<div class="loading">📚 No books found</div>';
           } else {
             displayResults(data.books);
           }
         } catch (error) {
-          resultsDiv.innerHTML =
-            '<div class="loading">⚠️ Failed to search books</div>';
+          resultsDiv.innerHTML = '<div class="loading">⚠️ Failed to search books</div>';
         } finally {
           searchButton.disabled = false;
           searchButton.textContent = "Search";
@@ -207,7 +399,7 @@
         resultsDiv.innerHTML = books
           .map(
             (book, index) => `
-                <div class="book-item">
+                <div class="book-item animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
                     <input type="checkbox" id="book${index}">
                     <div class="book-title">${book.Title}</div>
                     <a href="${book.Link}" class="book-link" target="_blank">🔗 Open</a>
@@ -215,7 +407,10 @@
             `
           )
           .join("");
-        document.getElementById("saveButton").style.display = "block";
+        
+        const saveButton = document.getElementById("saveButton");
+        saveButton.style.display = "block";
+        saveButton.classList.add("animate__animated", "animate__fadeIn");
       }
 
       async function saveSelected() {
@@ -232,13 +427,21 @@
           window.open(link, "_blank");
         });
 
-        await fetch(`${API_BASE_URL}/api/save-links`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ links }),
-        });
-
-        alert(`Saved ${links.length} book links!`);
+        try {
+          await fetch(`${API_BASE_URL}/api/save-links`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ links }),
+          });
+          
+          const saveButton = document.getElementById("saveButton");
+          saveButton.textContent = "✨ Saved Successfully!";
+          setTimeout(() => {
+            saveButton.textContent = "Save & Open Selected";
+          }, 2000);
+        } catch (error) {
+          alert("Failed to save links. Please try again.");
+        }
       }
     </script>
   </body>
